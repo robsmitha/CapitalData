@@ -1,0 +1,27 @@
+﻿
+<div id="bill_list"></div>
+
+@section Scripts{
+    <script src="~/js/List.js" asp-append-version="true"></script>
+    <script>
+        var bills = $('#bill_list').List({
+            defaultArgs: { chamber: '@ViewData["chamber"].ToString()' },
+            loadUrl: '/Bills/List',
+            onComplete: function (data) {
+                $('#tbl_bills').DataTable({
+                    "pageLength": 25,
+                    order: [[1, 'desc']],
+                    "columns": [
+                        null,
+                        { "type": "date" },
+                        null,
+                        null
+                    ]
+                })
+            }
+        })
+        function ChamberFilterChanged(sender, congress, chamber) {
+            bills.list({ chamber: chamber })
+        }
+    </script>
+}

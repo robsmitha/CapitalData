@@ -1,0 +1,71 @@
+﻿@model List<BillViewModel>
+@{ 
+    var chamber = ViewData["chamber"].ToString();
+    var chamberFormatted = chamber.First().ToString().ToUpper() + chamber.Substring(1);
+}
+@functions{
+    string GetPartyColor(string party)
+    {
+        var partycolor = string.Empty;
+        switch (party)
+        {
+            case "R":
+                partycolor = "danger";
+                break;
+            case "D":
+                partycolor = "primary";
+                break;
+            case "I":
+                partycolor = "secondary";
+                break;
+        }
+        return partycolor;
+    }
+}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3">
+        <h1 class="h2 font-weight-light">
+            @chamberFormatted Bills
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            @await Component.InvokeAsync("ChamberFilter", new { chamber = ViewData["chamber"] })
+        </div>
+
+    </div>
+@if (Model?.Count > 0)
+    {
+    <div class="table-responsive">
+        <table id="tbl_bills" class="table table-hover table-sm">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Bill</th>
+                    <th>Title</th>
+                    <th>Scheduled at</th>
+                    <th>Consideration</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var bill in Model)
+                {  
+                <tr>
+                    <td>
+                        <a href="/Bills/Details?congress=@bill.congress&id=@bill.bill_id">
+                            @bill.bill_id
+                        </a>
+                    </td>
+                    <td>@bill.title</td>
+                    <td>@bill.scheduled_at.Value</td>
+                    <td>
+                        @bill.consideration
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+<div class="text-danger">
+    There are no upcoming bills in the @chamberFormatted
+</div>
+}

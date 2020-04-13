@@ -1,0 +1,89 @@
+﻿@model List<MemberViewModel>
+@{ 
+    var chamber = ViewData["chamber"].ToString();
+    var congress = ViewData["congress"].ToString();
+    var chamberFormatted = chamber.First().ToString().ToUpper() + chamber.Substring(1);
+}
+@functions{
+    string GetPartyColor(string party)
+    {
+        var partycolor = string.Empty;
+        switch (party)
+        {
+            case "R":
+                partycolor = "danger";
+                break;
+            case "D":
+                partycolor = "primary";
+                break;
+            case "I":
+                partycolor = "secondary";
+                break;
+        }
+        return partycolor;
+    }
+}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3">
+        <h1 class="h2 font-weight-light">
+            @chamberFormatted Members
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            @await Component.InvokeAsync("ChamberFilter", new { congress = ViewData["congress"], chamber = ViewData["chamber"] })
+
+            @await Component.InvokeAsync("CongressFilter", new { congress = ViewData["congress"], chamber = ViewData["chamber"] })
+        </div>
+
+    </div>
+
+@if (Model?.Count > 0)
+    {
+    <div class="table-responsive">
+        <table id="tbl_members" class="table table-hover table-sm">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Title</th>
+                    <th>Votes With Party</th>
+                    <th>Missed Votes</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var member in Model)
+    {
+                <tr>
+                    <td data-order="@member.last_name">
+                        <a href="/Members/Details/@member.id">
+                            (@member.party) @member.first_name @member.last_name
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/Members/Details/@member.id">
+                            @member.title
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/Members/Details/@member.id" class="badge badge-pill badge-@GetPartyColor(member.party)">
+                            @member.votes_with_party_pct%
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/Members/Details/@member.id" class="badge badge-warning badge-pill">
+                            @member.missed_votes_pct%
+                        </a>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p>
+        Members aren't loading right now. 
+        <a href="/Members">
+            Click Here
+        </a>
+        to try again.
+    </p>
+}

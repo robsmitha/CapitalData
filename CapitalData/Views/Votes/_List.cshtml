@@ -1,0 +1,94 @@
+﻿@model VoteListViewModel
+@{ 
+    var chamber = ViewData["chamber"].ToString();
+    var chamberFormatted = chamber.First().ToString().ToUpper() + chamber.Substring(1);
+}
+@functions{
+    string GetPartyColor(string party)
+    {
+        var partycolor = string.Empty;
+        switch (party)
+        {
+            case "R":
+                partycolor = "danger";
+                break;
+            case "D":
+                partycolor = "primary";
+                break;
+            case "I":
+                partycolor = "secondary";
+                break;
+        }
+        return partycolor;
+    }
+}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3">
+        <h1 class="h2 font-weight-light">
+            Recent @chamberFormatted Votes
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            @await Component.InvokeAsync("ChamberFilter", new { chamber = ViewData["chamber"] })
+        </div>
+    </div>
+
+<div class="row">
+    <div class="col-md-8">
+        @if (Model.Votes?.Count > 0)
+        {
+            <div class="table-responsive">
+                <table id="tbl_votes" class="table table-hover table-sm">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Result</th>
+                            <th>Date</th>
+                            <th>Question</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var vote in Model.Votes)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="/Votes/Details?congress=@vote.congress&chamber=@vote.chamber&sessionNumber=@vote.session&rollCallNumber=@vote.roll_call">
+                                        @vote.result
+                                    </a>
+                                </td>
+                                <td>
+                                    @Convert.ToDateTime(vote.date).ToShortDateString()
+                                </td>
+                                <td>
+                                    <i>
+                                        @vote.question
+                                    </i>
+                                </td>
+                                <td>
+                                    <strong>
+                                        @vote.description
+                                    </strong>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger">
+                There are no Recent Votes in the @chamberFormatted
+            </div>
+        }
+    </div>
+    <div class="col-md-4">
+        <div style="height: 500px">
+            <canvas id="votesBarChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    var labels = JSON.parse('@Html.Raw(Model.VoteChartLabelsJSON)');
+    var data = JSON.parse('@Html.Raw(Model.VoteChartDataJSON)');
+    initVotesBarChart(labels, data);
+</script>

@@ -1,0 +1,201 @@
+﻿@model VoteViewModel
+@{
+    ViewData["Title"] = "Vote";
+    var bill_id = Model?.bill != null && Model.bill?.bill_id != null ? Model.bill.bill_id.Replace($"-{Model.congress}", string.Empty) : "";
+}
+
+<h2 class="font-weight-light">
+    <strong>
+        @Model.question:
+    </strong> @Model.result
+</h2>
+<p class="lead">
+    @Model.description
+</p>
+
+@if (!string.IsNullOrEmpty(bill_id))
+{
+    <div class="list-group list-group-flush mb-3">
+        <a href="/Bills/Details?id=@bill_id&congress=@Model.congress" class="list-group-item list-group-item-action">
+            <div class="media-body pb-3 mb-0 lh-125">
+                <div class="row">
+                    <div class="col-md-auto text-center">
+                        <strong class="text-gray-dark h3 mb-2 font-weight-light">
+                            @bill_id
+                        </strong>
+
+                    </div>
+                    <div class="col-md">
+                        <strong class="text-gray-dark mb-2 lead font-weight-light">@Model.bill.title</strong>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+}
+
+<h4 class="font-weight-light">
+    Voting Breakdown
+</h4>
+<div class="row">
+    <div class="col-md-4">
+        <div class="chart-bar">
+            <canvas id="votesBarChart"></canvas>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <table id="tbl_vote_totals" class="table table-sm">
+            <thead class="thead-light">
+                <tr>
+                    <th>
+                        Party
+                    </th>
+                    <th>
+                        Yes
+                    </th>
+                    <th>
+                        No
+                    </th>
+                    <th>
+                        Present
+                    </th>
+                    <th>
+                        Not Voting
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Republican</td>
+                    <td>
+                        @Model.republican.yes
+                    </td>
+                    <td>
+                        @Model.republican.no
+                    </td>
+                    <td>
+                        @Model.republican.present
+                    </td>
+                    <td>
+                        @Model.republican.not_voting
+                    </td>
+                </tr>
+                <tr>
+                    <td>Democratic</td>
+                    <td>
+                        @Model.democratic.yes
+                    </td>
+                    <td>
+                        @Model.democratic.no
+                    </td>
+                    <td>
+                        @Model.democratic.present
+                    </td>
+                    <td>
+                        @Model.democratic.not_voting
+                    </td>
+                </tr>
+                <tr>
+                    <td>Independent</td>
+                    <td>
+                        @Model.independent.yes
+                    </td>
+                    <td>
+                        @Model.independent.no
+                    </td>
+                    <td>
+                        @Model.independent.present
+                    </td>
+                    <td>
+                        @Model.independent.not_voting
+                    </td>
+                </tr>
+                <tr class="font-weight-bold bg-light">
+                    <td>Total</td>
+                    <td>
+                        @Model.total.yes
+                    </td>
+                    <td>
+                        @Model.total.no
+                    </td>
+                    <td>
+                        @Model.total.present
+                    </td>
+                    <td>
+                        @Model.total.not_voting
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<h4 class="font-weight-light">
+    Positions
+</h4>
+<div>
+    <div class="table-responsive">
+        @if (Model.positions.Count > 0)
+        {
+            <table class="table table-sm table-hover" id="tbl_positions">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>
+                            Name
+                        </th>
+                        <th>
+                            Position
+                        </th>
+                        <th>
+                            State
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.positions.Count; i++)
+                    {
+                        var position = Model.positions[i];
+                        <tr>
+                            <td data-order="@position.name">
+                                <a href="/Members/Details/@position.member_id">
+                                    (@position.party) @position.name
+                                </a>
+                            </td>
+                            <td>
+                                <span class="@GetYesNoColor(position.vote_position)">
+                                    @position.vote_position
+                                </span>
+                            </td>
+                            <td>
+                                @position.state
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+@section Scripts{
+    <script src="~/js/Votes/Details.cshtml.js" asp-append-version="true"></script>
+    <script>
+        VotesDetailsModule.init({
+            votes: JSON.parse('@Html.Raw(Model.VoteCountJSON)')
+        });
+    </script>
+}
+
+@functions{
+    string GetYesNoColor(string yesNo)
+    {
+        switch (yesNo.ToLower())
+        {
+            case "yes":
+                return "text-success";
+            case "no":
+                return "text-danger";
+        }
+        return string.Empty;
+    }
+}

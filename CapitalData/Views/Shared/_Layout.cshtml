@@ -1,0 +1,16 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CapitalData</title>
+    <partial name="_StyleSection" />
+</head>
+<body>
+    @await Component.InvokeAsync("Header")
+    @RenderBody()
+    @await Component.InvokeAsync("Footer")
+    <partial name="_ScriptSection" />
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

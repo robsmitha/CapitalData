@@ -1,0 +1,161 @@
+﻿@model MemberViewModel
+
+<link rel="stylesheet" href="~/css/profile.css" />
+
+@await Component.InvokeAsync("MemberNavbar", new { member = Model })
+
+<div class="my-3">
+    <h2 class="mb-3 font-weight-light">
+        Terms
+    </h2>
+    @if (Model.roles?.Count > 0)
+    {
+        <div class="table-responsive">
+            <table id="tbl_terms" class="table table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>
+                            Congress
+                        </th>
+                        <th>
+                            Term
+                        </th>
+                        <th>
+                            Votes With Party
+                        </th>
+                        <th>
+                            Sponsored Bills
+                        </th>
+                        <th>
+                            Co-sponsored Bills
+                        </th>
+                        <th>
+                            Missed Votes
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.roles?.Count; i++)
+                    {
+                        var role = Model.roles[i];
+                        <tr>
+                            <td data-sort="@role.congress">
+                                <span class="h3 font-weight-light">
+                                    @role.congress@GetOrdinalSuffix(Convert.ToInt32(role.congress))
+                                </span>
+                            </td>
+                            <td>
+                                @Convert.ToDateTime(role.start_date).Year to
+                                @Convert.ToDateTime(role.end_date).Year
+                            </td>
+                            <td>
+                                @if (role.votes_with_party_pct != null)
+                                {
+                                    <a href="/Members/Votes/@Model.id" class="badge badge-@GetPartyColor() badge-pill">
+                                        @role.votes_with_party_pct%
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        N/A
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (role.bills_sponsored != null)
+                                {
+                                    <a href="/Members/Bills/@Model.id" class="badge badge-success badge-pill">
+                                        @role.bills_sponsored
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        N/A
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (role.bills_cosponsored != null)
+                                {
+                                    <a href="/Members/CosponsoredBills/@Model.id" class="badge badge-info badge-pill">
+                                        @role.bills_cosponsored
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        N/A
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (role.missed_votes_pct != null)
+                                {
+                                    <span class="badge badge-warning badge-pill">
+                                        @role.missed_votes_pct%
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        N/A
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="media text-muted pt-3">
+            <div class="media-body pb-3 mb-0 lh-125">
+                <p class="text-danger">
+                    There are no terms for this member.
+                </p>
+            </div>
+        </div>
+    }
+</div>
+
+
+@section Scripts{
+    <script src="~/js/Members/Details.cshtml.js" asp-append-version="true"></script>
+    <script>
+        MembersDetailsModule.init();
+    </script>
+}
+
+@functions{
+    string GetPartyColor()
+    {
+        var partycolor = "dark";
+        switch (Model.party)
+        {
+            case "R":
+                partycolor = "danger";
+                break;
+            case "D":
+                partycolor = "primary";
+                break;
+            case "I":
+                partycolor = "secondary";
+                break;
+        }
+        return partycolor;
+    }
+    string GetOrdinalSuffix(int num)
+    {
+        if (num.ToString().EndsWith("11")) return "th";
+        if (num.ToString().EndsWith("12")) return "th";
+        if (num.ToString().EndsWith("13")) return "th";
+        if (num.ToString().EndsWith("1")) return "st";
+        if (num.ToString().EndsWith("2")) return "nd";
+        if (num.ToString().EndsWith("3")) return "rd";
+        return "th";
+    }
+}
